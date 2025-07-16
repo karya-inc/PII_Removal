@@ -1,0 +1,11 @@
+azure-ai-textanalytics==5.2.0
+azure-core
+azure-cognitiveservices-speech
+torch
+torchaudio
+numpy
+python-dotenv
+ipykernel
+soundfile
+pandas
+transformers
