@@ -9,3 +9,4 @@ ipykernel
 soundfile
 pandas
 transformers
+pydub
