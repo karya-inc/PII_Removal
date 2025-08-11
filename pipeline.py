@@ -19,7 +19,7 @@ def main():
         entity.text
         for doc in pii_result
         for entity in doc.entities
-        if entity.confidence_score > 0.7 and entity.category in {
+        if entity.confidence_score > confidence_threshold and entity.category in {
             'Person', 'Organization', 'PhoneNumber', 'Address',
             'Location', 'BankAccountNumber'
         }
