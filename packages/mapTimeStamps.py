@@ -35,20 +35,18 @@ def map_pii_to_timestamps(pii_words, asr_chunks, threshold=0.6):
     """
     # Preprocess the pii_words list first
     preprocessed_pii_words = preprocess_pii_words(pii_words)
-    # Lowercase all PII words once
-    preprocessed_pii_words_lower = [word.lower() for word in preprocessed_pii_words]
-    # Preprocess ASR chunks for faster lookup and add 'text_lower'
+    # Preprocess ASR chunks for faster lookup
     word_to_chunks = preprocess_asr_chunks(asr_chunks)
     pii_timestamps = []
     checked_chunks = set()
-    for word_lower in preprocessed_pii_words_lower:
+    for word in preprocessed_pii_words:
         # Only check chunks that contain the word (case-insensitive)
-        candidate_chunks = word_to_chunks.get(word_lower, [])
+        candidate_chunks = word_to_chunks.get(word.lower(), [])
         for chunk in candidate_chunks:
             chunk_id = id(chunk)
             if chunk_id in checked_chunks:
                 continue
-            score = SequenceMatcher(None, word_lower, chunk['text_lower']).ratio()
+            score = SequenceMatcher(None, word.lower(), chunk['text'].lower()).ratio()
             if score >= threshold:
                 pii_timestamps.append(chunk['timestamp'])
                 checked_chunks.add(chunk_id)
