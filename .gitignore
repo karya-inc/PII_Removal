@@ -1,3 +1,6 @@
 .env
 myenv
 pipeline2.ipynb
+packages\__pycache__
+pipeline3.ipynb
+transcript.ipynb
