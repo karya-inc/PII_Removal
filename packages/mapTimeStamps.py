@@ -15,28 +15,41 @@ def preprocess_pii_words(pii_words_list):
         preprocessed_list.extend(word.split())
     return preprocessed_list
 
+def preprocess_asr_chunks(asr_chunks):
+    """
+    Preprocess ASR chunks into a mapping from lowercased words to the chunks they appear in.
+    Returns a dictionary: word -> list of chunks containing that word.
+    """
+    from collections import defaultdict
+    word_to_chunks = defaultdict(list)
+    for chunk in asr_chunks:
+        words = set(chunk['text'].lower().split())
+        for word in words:
+            word_to_chunks[word].append(chunk)
+    return word_to_chunks
+
 def map_pii_to_timestamps(pii_words, asr_chunks, threshold=0.6):
     """
     For each PII word (including repeats), find all its matches in asr_chunks.
-    Returns a dictionary where each PII word is a key and its value is a list of all
-    matching timestamps.
+    Returns a list of all matching timestamps.
     """
     # Preprocess the pii_words list first
     preprocessed_pii_words = preprocess_pii_words(pii_words)
-
-    # Create a dictionary with a list for each unique word from the preprocessed list
+    # Preprocess ASR chunks for faster lookup
+    word_to_chunks = preprocess_asr_chunks(asr_chunks)
     pii_timestamps = []
-
+    checked_chunks = set()
     for word in preprocessed_pii_words:
-        for chunk in asr_chunks:
-            # Use SequenceMatcher to calculate a similarity ratio
-            # Convert both strings to lowercase for case-insensitive matching
+        # Only check chunks that contain the word (case-insensitive)
+        candidate_chunks = word_to_chunks.get(word.lower(), [])
+        for chunk in candidate_chunks:
+            chunk_id = id(chunk)
+            if chunk_id in checked_chunks:
+                continue
             score = SequenceMatcher(None, word.lower(), chunk['text'].lower()).ratio()
-            
-            # If the score is above the threshold, consider it a match
             if score >= threshold:
                 pii_timestamps.append(chunk['timestamp'])
-
+                checked_chunks.add(chunk_id)
     return pii_timestamps
 
 def map_pii_to_timestamps_with_words(pii_words, asr_chunks, threshold=0.6):
