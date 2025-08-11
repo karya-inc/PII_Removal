@@ -1,22 +1,13 @@
 import os
 import json
-import argparse
 from packages.transcripts import transcribe_with_timestamps
 from packages.PII_detection import detect_pii_entities
 from packages.mapTimeStamps import map_pii_to_timestamps
 
-# Paths are now configurable via command-line arguments
-parser = argparse.ArgumentParser(description="Evaluate PII detection on audio and annotation files.")
-parser.add_argument('--input_audio_path', type=str, default=os.path.join('data', '4547022.wav'),
-                    help='Path to the input audio file.')
-parser.add_argument('--annotations_folder_path', type=str, default=os.path.join('Annotations output'),
-                    help='Path to the folder containing annotation files.')
-parser.add_argument('--annotations_file_path', type=str, default=os.path.join('Annotations output', 'DS-19768.DP-0bbad67112dd4f3d8ae0a2b96d14184a.TS-2025-08-08T05-58-10.671Z.json'),
-                    help='Path to the specific annotation file.')
-args = parser.parse_args()
-input_audio_path = args.input_audio_path
-annotations_folder_path = args.annotations_folder_path
-annotations_file_path = args.annotations_file_path
+# Paths
+input_audio_path = r"D:\Coding\PII Evaluation\main server dataset\phase 3\4547022.wav"
+annotations_folder_path = r"D:\Coding\PII Evaluation\Annotations output"
+annotations_file_path = r"D:\Coding\PII Evaluation\Annotations output\DS-19768.DP-0bbad67112dd4f3d8ae0a2b96d14184a.TS-2025-08-08T05-58-10.671Z.json"
 
 def get_ground_truth_from_json(file_path):
     """Extract ground truth segments (in seconds) from a JSON annotation file."""
