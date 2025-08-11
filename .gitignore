@@ -7,3 +7,4 @@ evaluate.ipynb
 evaluate2.ipynb
 evaluate3.ipynb
 **/__pycache__/   # Ignore all __pycache__ folders anywhere in the repo
+__pycache__/
