@@ -1,6 +1,9 @@
 .env
 myenv
 pipeline2.ipynb
-packages\__pycache__
 pipeline3.ipynb
 transcript.ipynb
+evaluate.ipynb
+evaluate2.ipynb
+evaluate3.ipynb
+packages\__pycache__

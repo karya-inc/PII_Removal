@@ -1,11 +1,13 @@
 import json
 import requests
 import time
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Constants - keep your URL, API key, headers, and payload separate
-API_URL = "https://language-server-main-306601896586.us-central1.run.app/v1/transcription"
-API_KEY = "I568wPaBwNi9wLUgUTqX0WdoMpRMBtcOOxIfCS26ehY"
-AUDIO_FILE_PATH = r"output_audio\out-8968336334-1001-20250530-150555-1748597755.42124.wav"
+API_URL = os.getenv("API_URL_LANGUAGE_SERVER")
+API_KEY = os.getenv("API_KEY_LANGUAGE_SERVER")
 
 HEADERS = {
     "accept": "application/json",
