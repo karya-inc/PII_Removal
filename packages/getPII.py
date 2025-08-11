@@ -102,11 +102,12 @@ def process_audio_file(audio_path, output_folder, pii_categories=None, max_retri
     try:
         pii_result = detect_pii_entities([asr_text])
         for doc in pii_result:
-            for entity in doc.entities:
-                if entity.confidence_score > 0.6 and entity.category in pii_categories:
-                    pii_words.append(entity.text)
-                    if entity.category in file_category_map:
-                        file_category_map[entity.category] += 1
+            if hasattr(doc, "entities") and doc.entities:
+                for entity in doc.entities:
+                    if entity.confidence_score > 0.6 and entity.category in pii_categories:
+                        pii_words.append(entity.text)
+                        if entity.category in file_category_map:
+                            file_category_map[entity.category] += 1
         file_info["PII_total"] = len(pii_words)
         file_info.update(file_category_map)
     except Exception as e:
