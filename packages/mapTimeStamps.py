@@ -1,0 +1,99 @@
+from difflib import SequenceMatcher
+
+def preprocess_pii_words(pii_words_list):
+    """
+    Splits multi-word strings in a list of PII words into individual words.
+    
+    Args:
+        pii_words_list (list): A list of strings, which may contain multi-word entities.
+        
+    Returns:
+        list: A new list with all multi-word strings split into individual words.
+    """
+    preprocessed_list = []
+    for word in pii_words_list:
+        preprocessed_list.extend(word.split())
+    return preprocessed_list
+
+def preprocess_asr_chunks(asr_chunks):
+    """
+    Preprocess ASR chunks into a mapping from lowercased words to the chunks they appear in.
+    Returns a dictionary: word -> list of chunks containing that word.
+    """
+    from collections import defaultdict
+    word_to_chunks = defaultdict(list)
+    for chunk in asr_chunks:
+        words = set(chunk['text'].lower().split())
+        for word in words:
+            word_to_chunks[word].append(chunk)
+    return word_to_chunks
+
+def map_pii_to_timestamps(pii_words, asr_chunks, threshold=0.6):
+    """
+    For each PII word (including repeats), find all its matches in asr_chunks.
+    Returns a list of all matching timestamps.
+    """
+    # Preprocess the pii_words list first
+    preprocessed_pii_words = preprocess_pii_words(pii_words)
+    # Preprocess ASR chunks for faster lookup
+    word_to_chunks = preprocess_asr_chunks(asr_chunks)
+    pii_timestamps = []
+    checked_chunks = set()
+    for word in preprocessed_pii_words:
+        # Only check chunks that contain the word (case-insensitive)
+        candidate_chunks = word_to_chunks.get(word.lower(), [])
+        for chunk in candidate_chunks:
+            chunk_id = id(chunk)
+            if chunk_id in checked_chunks:
+                continue
+            score = SequenceMatcher(None, word.lower(), chunk['text'].lower()).ratio()
+            if score >= threshold:
+                pii_timestamps.append(chunk['timestamp'])
+                checked_chunks.add(chunk_id)
+    return pii_timestamps
+
+def map_pii_to_timestamps_with_words(pii_words, asr_chunks, threshold=0.6):
+    """
+    For each PII word (including repeats), find all its matches in asr_chunks.
+    Returns a dictionary where each PII word is a key and its value is a list of all
+    matching timestamps.
+    """
+    # Preprocess the pii_words list first
+    preprocessed_pii_words = preprocess_pii_words(pii_words)
+
+    # Create a dictionary with a list for each unique word from the preprocessed list
+    pii_timestamps = {word: [] for word in set(preprocessed_pii_words)}
+
+    for word in preprocessed_pii_words:
+        for chunk in asr_chunks:
+            # Use SequenceMatcher to calculate a similarity ratio
+            # Convert both strings to lowercase for case-insensitive matching
+            score = SequenceMatcher(None, word.lower(), chunk['text'].lower()).ratio()
+            
+            # If the score is above the threshold, consider it a match
+            if score >= threshold:
+                pii_timestamps[word].append(chunk['timestamp'])
+
+    return pii_timestamps
+
+# --- Example Usage ---
+
+if __name__ == '__main__':
+    # Original PII list with a multi-word entity
+    original_pii_words = ['दीपा', 'दीदी', 'संगीता वर्मा']
+
+    # ASR chunks with fuzzy matches and a multi-word name
+    asr_chunks = [
+        {'text': "नमस्ते दीपा", 'timestamp': (0.71, 1.03)},
+        {'text': "मेरी बहन दीदी", 'timestamp': (7.43, 7.67)},
+        {'text': "यहां पर हैं संगीता वर्मा", 'timestamp': (11.75, 12.5)},
+        {'text': "यह दीदी के घर है", 'timestamp': (41.11, 41.47)},
+    ]
+
+    # Find all timestamps for the PII words
+    all_pii_timestamps = map_pii_to_timestamps(original_pii_words, asr_chunks, threshold=0.8)
+
+    print(f"Original PII list: {original_pii_words}")
+    print("\n--- All Timestamps for PII words ---")
+    for pii, timestamps in all_pii_timestamps.items():
+        print(f"'{pii}': {timestamps}")
