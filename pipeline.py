@@ -4,7 +4,7 @@ from packages.mapTimeStamps import map_pii_to_timestamps
 from packages.saveRedactedAudio import redact_audio
 
 def main():
-    input_audio_path = r"inputs\in-70001-919417328881-20250530-160219-1748601139.42162.wav"
+    input_audio_path = r"/home/anipr/PII_Detection/inputs/in-8968336334-1001-20250530-150555-1748597755.42124.wav"
 
     # Step 1: Transcribe audio
     transcript = process_asr(input_audio_path)
